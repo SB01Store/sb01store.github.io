@@ -222,7 +222,7 @@ body {
 <!-- Προαιρετικός πίνακας barcode προς προϊόν, για όσα το barcode δεν είναι ο κωδικός του site -->
 <script src="barcodes.js?v=2026-10-10b"></script>
 <!-- Λίστα καταστήματος: προϊόντα εκτός site με τιμή καταλόγου του προμηθευτή -->
-<script src="katastima.js?v=2026-10-10b"></script>
+<script src="katastima.js?v=2026-10-10c"></script>
 <script>
 'use strict';
 
@@ -467,21 +467,27 @@ function storeItem(code) {
   return e ? { ean: e, row: L[e] } : null;
 }
 function showStoreItem(st) {
-  const [name, sku, price, source, date] = st.row;
-  const amount = Number(price).toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  // [όνομα, κωδικός, τιμή, πηγή, ημερομηνία λίστας, αρχική τιμή ή 0, k = τιμή καταλόγου / s = τιμή καταστήματος]
+  const [name, sku, price, source, date, regular, kind] = st.row;
+  const eur = v => Number(v).toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   const d = String(date).split('-').reverse().join('/');
+  const sale = regular && Number(regular) > Number(price);
+  const pct = sale ? Math.round((1 - Number(price) / Number(regular)) * 100) : 0;
+  const hasEan = !String(st.ean).startsWith('#');
   setOut(h('div', { class: 'card product' },
     h('div', { class: 'img' }, h('span', {}, 'Χωρίς φωτογραφία')),
     h('div', {},
       h('h1', { class: 'name' }, name),
       h('div', { class: 'meta' },
         h('span', {}, 'Κωδικός ', h('b', {}, sku || '-')),
-        h('span', {}, 'Barcode ', h('b', {}, st.ean))),
-      h('div', { class: 'price' }, amount),
+        hasEan ? h('span', {}, 'Barcode ', h('b', {}, st.ean)) : null),
+      h('div', { class: 'price' + (sale ? ' sale' : '') }, eur(price)),
+      sale ? h('div', { class: 'was' }, h('s', {}, eur(regular)), pct >= 1 ? h('span', { class: 'badge' }, '-' + pct + '%') : null) : null,
       h('div', { class: 'pill warn' }, 'Δεν είναι στο site'),
-      h('div', { class: 'stamp' }, h('span', {}, 'Τιμή καταλόγου ' + source + ', λίστα ' + d)))
+      h('div', { class: 'stamp' }, h('span', {},
+        (kind === 's' ? 'Τιμή καταστήματος' : 'Τιμή καταλόγου ' + source) + ', λίστα ' + d)))
   ));
-  pushRecent({ code: st.ean, name, price: amount });
+  pushRecent({ code: hasEan ? st.ean : sku, name, price: eur(price) });
 }
 
 async function loadSizes(parentId, currentId, box, my) {
