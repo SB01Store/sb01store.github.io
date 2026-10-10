@@ -202,7 +202,7 @@ body {
 </div>
 
 <!-- Προαιρετικός πίνακας barcode προς προϊόν, για όσα το barcode δεν είναι ο κωδικός του site -->
-<script src="barcodes.js"></script>
+<script src="barcodes.js?v=2026-10-10"></script>
 <script>
 'use strict';
 
@@ -306,18 +306,19 @@ async function lookup(raw) {
   showLoading(s);
   try {
     if (isCode) {
-      const r = await jsonp(`?sku=${enc(s)}&_fields=${FIELDS}`);
-      if (my !== seq) return;
-      const exact = (Array.isArray(r) ? r : []).filter(p => (p.sku || '').toLowerCase() === s.toLowerCase());
-      if (exact.length === 1) return showProduct(exact[0], my);
-      if (exact.length > 1) return showList(exact, `Ο κωδικός ${s} ανήκει σε ${exact.length} προϊόντα. Διαλέξτε:`, my);
-
+      // Πρώτα η λίστα barcode: εκεί είναι όσα το barcode του κουτιού δεν είναι ο κωδικός του site
       const id = (window.SB_BARCODES || {})[s];
       if (id) {
         const p = await jsonp(`/${enc(id)}?_fields=${FIELDS}`);
         if (my !== seq) return;
         if (p && p.id) return showProduct(p, my);
       }
+      const r = await jsonp(`?sku=${enc(s)}&_fields=${FIELDS}`);
+      if (my !== seq) return;
+      const exact = (Array.isArray(r) ? r : []).filter(p => (p.sku || '').toLowerCase() === s.toLowerCase());
+      if (exact.length === 1) return showProduct(exact[0], my);
+      if (exact.length > 1) return showList(exact, `Ο κωδικός ${s} ανήκει σε ${exact.length} προϊόντα. Διαλέξτε:`, my);
+
       if (s.length >= 5) {
         const r2 = await jsonp(`?search=${enc(s)}&per_page=10&_fields=${FIELDS}`);
         if (my !== seq) return;
@@ -400,7 +401,7 @@ function priceBlock(p) {
   const nodes = [h('div', { class: 'price' + (sale ? ' sale' : '') }, money(pr, pr.price))];
   if (sale) {
     const pct = Math.round((1 - parseInt(pr.price, 10) / parseInt(pr.regular_price, 10)) * 100);
-    nodes.push(h('div', { class: 'was' }, h('s', {}, money(pr, pr.regular_price)), h('span', { class: 'badge' }, '-' + pct + '%')));
+    nodes.push(h('div', { class: 'was' }, h('s', {}, money(pr, pr.regular_price)), pct >= 1 ? h('span', { class: 'badge' }, '-' + pct + '%') : null));
   }
   return nodes;
 }
