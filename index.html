@@ -160,6 +160,15 @@ body {
 .chip span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip b { font-variant-numeric: tabular-nums; }
 
+/* Τιμή site ή τιμή καταστήματος: να μη μπερδεύονται ποτέ */
+.pricelabel { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin: 18px 0 -10px; color: var(--accent); }
+.storebanner {
+  border-radius: var(--radius) var(--radius) 0 0; margin-bottom: -16px; padding: 14px 20px 30px;
+  background: var(--warn); color: var(--warn-bg); font-size: 19px; font-weight: 800; letter-spacing: 0.02em;
+}
+.card.store { background: var(--warn-bg); border: 3px solid var(--warn); }
+.card.store .pricelabel, .card.store .price { color: var(--warn); }
+
 /* Κωδικοί που δεν βρέθηκαν */
 .misslink {
   align-self: flex-start; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
@@ -222,7 +231,7 @@ body {
 <!-- Προαιρετικός πίνακας barcode προς προϊόν, για όσα το barcode δεν είναι ο κωδικός του site -->
 <script src="barcodes.js?v=2026-10-10b"></script>
 <!-- Λίστα καταστήματος: προϊόντα εκτός site με τιμή καταλόγου του προμηθευτή -->
-<script src="katastima.js?v=2026-10-10c"></script>
+<script src="katastima.js?v=2026-10-10d"></script>
 <script>
 'use strict';
 
@@ -441,6 +450,7 @@ function showProduct(p, my) {
       h('div', { class: 'meta' },
         h('span', {}, 'Κωδικός ', h('b', {}, p.sku || '-')),
         size ? h('span', {}, 'Μέγεθος ', h('b', {}, size)) : null),
+      h('div', { class: 'pricelabel' }, 'Τιμή site'),
       priceBlock(p),
       p.type === 'variable' ? null :
         h('div', { class: 'pill ' + stockClass(p.stock_availability, p.is_in_stock) },
@@ -474,20 +484,20 @@ function showStoreItem(st) {
   const sale = regular && Number(regular) > Number(price);
   const pct = sale ? Math.round((1 - Number(price) / Number(regular)) * 100) : 0;
   const hasEan = !String(st.ean).startsWith('#');
-  setOut(h('div', { class: 'card product' },
+  setOut(h('div', { class: 'storebanner' }, 'ΔΕΝ ΕΙΝΑΙ ΤΙΜΗ SITE · το προϊόν δεν είναι στο site'),
+    h('div', { class: 'card product store' },
     h('div', { class: 'img' }, h('span', {}, 'Χωρίς φωτογραφία')),
     h('div', {},
       h('h1', { class: 'name' }, name),
       h('div', { class: 'meta' },
         h('span', {}, 'Κωδικός ', h('b', {}, sku || '-')),
         hasEan ? h('span', {}, 'Barcode ', h('b', {}, st.ean)) : null),
+      h('div', { class: 'pricelabel' }, kind === 's' ? 'Τιμή καταστήματος' : 'Τιμή καταλόγου ' + source),
       h('div', { class: 'price' + (sale ? ' sale' : '') }, eur(price)),
       sale ? h('div', { class: 'was' }, h('s', {}, eur(regular)), pct >= 1 ? h('span', { class: 'badge' }, '-' + pct + '%') : null) : null,
-      h('div', { class: 'pill warn' }, 'Δεν είναι στο site'),
-      h('div', { class: 'stamp' }, h('span', {},
-        (kind === 's' ? 'Τιμή καταστήματος' : 'Τιμή καταλόγου ' + source) + ', λίστα ' + d)))
+      h('div', { class: 'stamp' }, h('span', {}, 'Από λίστα της ' + d + ', δεν αλλάζει μόνη της')))
   ));
-  pushRecent({ code: hasEan ? st.ean : sku, name, price: eur(price) });
+  pushRecent({ code: hasEan ? st.ean : sku, name: name + ' (κατάστημα)', price: eur(price) });
 }
 
 async function loadSizes(parentId, currentId, box, my) {
