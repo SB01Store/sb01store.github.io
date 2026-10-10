@@ -160,6 +160,23 @@ body {
 .chip span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip b { font-variant-numeric: tabular-nums; }
 
+/* Κωδικοί που δεν βρέθηκαν */
+.misslink {
+  align-self: flex-start; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+  border: 1px dashed var(--line); border-radius: 10px; padding: 10px 14px;
+  background: transparent; color: var(--muted);
+}
+.miss h3 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
+.miss .sub { color: var(--muted); font-size: 15px; margin: 0 0 12px; }
+.miss .mrow {
+  display: flex; justify-content: space-between; gap: 12px; width: 100%;
+  font: inherit; font-size: 17px; color: var(--ink); text-align: left; cursor: pointer;
+  background: none; border: 0; border-top: 1px solid var(--line); padding: 12px 4px;
+}
+.miss .mrow .code { font-family: ui-monospace, Menlo, Consolas, monospace; }
+.miss .mrow .when { color: var(--muted); font-size: 14px; white-space: nowrap; }
+.miss .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
 /* Κάμερα */
 #scanner { position: fixed; inset: 0; background: #000; z-index: 10; }
 #scanner[hidden] { display: none; }
@@ -187,6 +204,7 @@ body {
     <h3>Πρόσφατα</h3>
     <div class="chips" id="chips"></div>
   </section>
+  <button type="button" class="misslink" id="missLink" hidden></button>
 </div>
 
 <button type="button" class="scanbtn" id="cam">Σκανάρισμα</button>
@@ -374,6 +392,7 @@ function showLoading(s) {
   ));
 }
 function showNotFound(s, byName) {
+  if (!byName) addMissing(s);
   setOut(h('div', { class: 'card state' },
     h('p', { class: 'big' }, 'Δεν υπάρχει στο site'),
     byName
@@ -484,6 +503,53 @@ function drawRecent() {
     h('button', { type: 'button', class: 'chip', onclick: () => openById(x.id) },
       h('span', {}, x.name), h('b', {}, x.price))));
 }
+
+// ---------- Κωδικοί που δεν βρέθηκαν ----------
+// Κρατιούνται σε αυτή τη συσκευή, για να σταλούν και να μπουν στη λίστα barcode ή στη λίστα καταστήματος.
+let missing = [];
+try { missing = JSON.parse(localStorage.getItem('sb_missing') || '[]'); } catch (e) { missing = []; }
+function saveMissing() {
+  try { localStorage.setItem('sb_missing', JSON.stringify(missing)); } catch (e) {}
+  drawMissingLink();
+}
+function addMissing(code) {
+  if (String(code).length < 6) return;
+  missing = [{ c: code, t: Date.now() }].concat(missing.filter(x => x.c !== code)).slice(0, 300);
+  saveMissing();
+}
+function drawMissingLink() {
+  const b = $('missLink');
+  b.hidden = missing.length === 0;
+  b.textContent = 'Κωδικοί που δεν βρέθηκαν: ' + missing.length;
+}
+function whenText(t) {
+  return new Date(t).toLocaleString('el-GR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+function missingText() {
+  return 'Super Baby, κωδικοί που δεν βρέθηκαν στο site (' + missing.length + ')\n' +
+    missing.map(x => x.c + '   ' + whenText(x.t)).join('\n');
+}
+function showMissing() {
+  ++seq;
+  let armed = false;
+  const clearBtn = h('button', { type: 'button', class: 'btn', onclick: () => {
+    if (!armed) { armed = true; clearBtn.textContent = 'Πατήστε ξανά για καθαρισμό'; return; }
+    missing = []; saveMissing(); showIdle();
+  } }, 'Καθαρισμός λίστας');
+  const sendBtn = h('button', { type: 'button', class: 'btn primary', onclick: async () => {
+    const text = missingText();
+    try { if (navigator.share) { await navigator.share({ text }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(text); sendBtn.textContent = 'Αντιγράφηκε'; } catch (e) { sendBtn.textContent = 'Δεν έγινε αντιγραφή'; }
+  } }, 'Αποστολή');
+  setOut(h('div', { class: 'card miss' },
+    h('h3', {}, 'Κωδικοί που δεν βρέθηκαν στο site'),
+    h('p', { class: 'sub' }, 'Μόνο σε αυτή τη συσκευή. Στείλτε τη λίστα για να μπουν στη σελίδα. Πατήστε έναν κωδικό για να ξαναψάξει.'),
+    missing.map(x => h('button', { type: 'button', class: 'mrow', onclick: () => lookup(x.c) },
+      h('span', { class: 'code' }, x.c), h('span', { class: 'when' }, whenText(x.t)))),
+    h('div', { class: 'actions' }, sendBtn, clearBtn)
+  ));
+}
+$('missLink').addEventListener('click', showMissing);
 
 // ---------- Πληκτρολόγηση και σκάνερ ----------
 $('f').addEventListener('submit', e => {
@@ -656,6 +722,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 showIdle();
 drawRecent();
+drawMissingLink();
 </script>
 </body>
 </html>
