@@ -231,7 +231,7 @@ body {
 <!-- Προαιρετικός πίνακας barcode προς προϊόν, για όσα το barcode δεν είναι ο κωδικός του site -->
 <script src="barcodes.js?v=2026-10-10b"></script>
 <!-- Λίστα καταστήματος: προϊόντα εκτός site με τιμή καταλόγου του προμηθευτή -->
-<script src="katastima.js?v=2026-10-10e"></script>
+<script src="katastima.js?v=2026-10-10f"></script>
 <script>
 'use strict';
 
@@ -484,7 +484,7 @@ function showStoreItem(st) {
   const sale = regular && Number(regular) > Number(price);
   const pct = sale ? Math.round((1 - Number(price) / Number(regular)) * 100) : 0;
   const hasEan = !String(st.ean).startsWith('#');
-  setOut(h('div', { class: 'storebanner' }, 'ΔΕΝ ΕΙΝΑΙ ΤΙΜΗ SITE · το προϊόν δεν είναι στο site'),
+  setOut(h('div', { class: 'storebanner' }, 'ΤΙΜΗ ΚΑΤΑΣΤΗΜΑΤΟΣ · το προϊόν δεν είναι στο site'),
     h('div', { class: 'card product store' },
     h('div', { class: 'img' }, h('span', {}, 'Χωρίς φωτογραφία')),
     h('div', {},
@@ -492,10 +492,10 @@ function showStoreItem(st) {
       h('div', { class: 'meta' },
         h('span', {}, 'Κωδικός ', h('b', {}, sku || '-')),
         hasEan ? h('span', {}, 'Barcode ', h('b', {}, st.ean)) : null),
-      h('div', { class: 'pricelabel' }, kind === 's' ? 'Τιμή καταστήματος' : 'Τιμή καταλόγου ' + source),
+      h('div', { class: 'pricelabel' }, 'Τιμή καταστήματος'),
       h('div', { class: 'price' + (sale ? ' sale' : '') }, eur(price)),
       sale ? h('div', { class: 'was' }, h('s', {}, eur(regular)), pct >= 1 ? h('span', { class: 'badge' }, '-' + pct + '%') : null) : null,
-      h('div', { class: 'stamp' }, h('span', {}, 'Από λίστα της ' + d + ', δεν αλλάζει μόνη της')))
+      h('div', { class: 'stamp' }, h('span', {}, (kind === 's' ? '' : 'Τιμή καταλόγου ' + source + ', ') + 'λίστα της ' + d + ', δεν αλλάζει μόνη της')))
   ));
   pushRecent({ code: hasEan ? st.ean : sku, name: name + ' (κατάστημα)', price: eur(price) });
 }
