@@ -1,6 +1,6 @@
 // Προϊόντα που ΔΕΝ είναι στο site: EAN -> [όνομα, κωδικός, τιμή, πηγή, ημερομηνία, αρχική τιμή ή 0,
 // k = τιμή καταλόγου του προμηθευτή, s = τιμή καταστήματος]. Δεν ενημερώνεται μόνη της.
-// Φτιάχτηκε από systems/dashboard/build_katastima.py, 1180 προϊόντα.
+// Φτιάχτηκε από systems/dashboard/build_katastima.py, 1182 προϊόντα.
 window.SB_KATASTIMA = {
 "#10072202601":["Lorelli Car Seat Sol Black 125-150Cm", "10072202601", 16.09, "Lorelli", "2026-10-10", 17.88, "s"],
 "#10072202609":["Lorelli Car Seat Sol Beige 125-150Cm", "10072202609", 16.09, "Lorelli", "2026-10-10", 17.88, "s"],
@@ -375,6 +375,7 @@ window.SB_KATASTIMA = {
 "3800146244484":["Cangaroo Baby walker Bravy grey", "3800146244484", 47.5, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146247331":["Cangaroo Bed rail blue", "3800146247331", 26.78, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146248116":["Cangaroo Electric swing iSwing light grey", "3800146248116", 123.5, "Cangaroo", "2026-10-10", 0, "s"],
+"3800146248543":["Cangaroo Electric swing Ari grey", "3800146248543", 106.0, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146249014":["Cangaroo ΡΗΛΑΞ ΚΟΥΝΙΑ ΗΛΕΚΤΡΙΚΗ CANGAROO ISWING GRAPHITE + ΔΩΡΟ ΜΑΣΗΤΙΚΟ ΟΔΟΝΤΟΦΥΐΑΣ", "3800146249014", 123.5, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146249021":["Cangaroo Electric swing iSwing silver", "3800146249021", 123.5, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146249120":["Cangaroo Baby crib 2 in 1 Day`n`Night", "3800146249120", 135.68, "Cangaroo", "2026-10-10", 0, "s"],
@@ -413,6 +414,7 @@ window.SB_KATASTIMA = {
 "3800146270254":["Cangaroo ΘΕΡΜΙΚΗ ΖΩΝΗ ΚΑΤΑ ΤΩΝ ΚΟΛΙΚΩΝ PINK HUGZZZ 3800146270254", "3800146270254", 9.82, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146270261":["Cangaroo ΘΕΡΜΙΚΗ ΖΩΝΗ ΚΑΤΑ ΤΩΝ ΚΟΛΙΚΩΝ GREY HUGZZZ 3800146270261", "3800146270261", 9.8, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146270322":["Cangaroo Baby car mirror LUPAH", "3800146270322", 10.4, "Cangaroo", "2026-10-10", 0, "s"],
+"3800146270360":["Cangaroo Universal double hooks for stroller", "3800146270360", 3.62, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146270605":["Cangaroo Ergonomic carrier Explorer dark green", "3800146270605", 32.4, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146270643":["Cangaroo Happy feet black BW001", "3800146270643", 10.92, "Cangaroo", "2026-10-10", 0, "s"],
 "3800146270667":["Cangaroo Happy feet dark green BW001", "3800146270667", 10.92, "Cangaroo", "2026-10-10", 0, "s"],
