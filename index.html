@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Έλεγχος τιμής</title>
+<style>
+:root {
+  --bg: #f3f1ed;
+  --surface: #ffffff;
+  --ink: #1c1a18;
+  --muted: #6a655e;
+  --line: #e2ded6;
+  --accent: #1d5f8a;
+  --accent-ink: #ffffff;
+  --sale: #c03a26;
+  --ok: #24704a;   --ok-bg: #e2f2e8;
+  --warn: #8a5a00; --warn-bg: #faefd6;
+  --bad: #ad2a20;  --bad-bg: #fbe3e0;
+  --radius: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131211;
+    --surface: #1e1c1a;
+    --ink: #f1eee9;
+    --muted: #a49e95;
+    --line: #36322e;
+    --accent: #6cb0e0;
+    --accent-ink: #0b1923;
+    --sale: #ff8b74;
+    --ok: #7ed3a0;   --ok-bg: #19301f;
+    --warn: #f0c46a; --warn-bg: #352a12;
+    --bad: #ff8d84;  --bad-bg: #3a1b18;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.app { max-width: 1100px; margin: 0 auto; padding: 16px 16px 120px; display: flex; flex-direction: column; gap: 16px; }
+
+/* Το κύριο κουμπί, κάτω στο κέντρο, εκεί που φτάνει ο αντίχειρας */
+.scanbtn {
+  position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+  width: min(440px, calc(100% - 32px)); min-height: 76px; z-index: 5;
+  font: inherit; font-size: 24px; font-weight: 700; cursor: pointer;
+  border: 0; border-radius: 999px;
+  background: var(--accent); color: var(--accent-ink);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+}
+.scanbtn:active { transform: translateX(-50%) translateY(1px); }
+
+/* Μπάρα αναζήτησης */
+.bar { display: flex; gap: 10px; }
+#q {
+  flex: 1; min-width: 0;
+  font: inherit; font-size: 22px;
+  padding: 0 16px; min-height: 60px;
+  border: 2px solid var(--line); border-radius: 12px;
+  background: var(--surface); color: var(--ink);
+}
+#q:focus { outline: none; border-color: var(--accent); }
+.btn {
+  font: inherit; font-size: 18px; font-weight: 600;
+  padding: 0 22px; min-height: 60px;
+  border: 2px solid var(--line); border-radius: 12px;
+  background: var(--surface); color: var(--ink); cursor: pointer;
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn:active { transform: translateY(1px); }
+@media (max-width: 640px) {
+  .bar { flex-wrap: wrap; }
+  #q { flex-basis: 100%; }
+  .bar .btn { flex: 1; }
+}
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+
+/* Προϊόν */
+.product { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; }
+.product .img {
+  width: 100%; aspect-ratio: 1; border-radius: 12px; background: #fff;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  border: 1px solid var(--line);
+}
+.product .img img { width: 100%; height: 100%; object-fit: contain; }
+.product .img span { color: #8c867e; font-size: 14px; }
+@media (max-width: 640px) { .product { grid-template-columns: 110px 1fr; gap: 14px; } }
+.name { font-size: 24px; font-weight: 650; line-height: 1.25; margin: 0 0 8px; }
+.meta { color: var(--muted); font-size: 16px; display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.meta b { color: var(--ink); font-weight: 600; }
+.price {
+  font-size: 68px; font-weight: 750; letter-spacing: -0.02em; line-height: 1;
+  margin: 20px 0 8px; font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) { .price { font-size: 48px; } .name { font-size: 20px; } }
+.price.sale { color: var(--sale); }
+.price small { font-size: 0.4em; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+.was { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.was s { font-size: 22px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.badge { font-weight: 700; font-size: 18px; padding: 4px 10px; border-radius: 8px; background: var(--sale); color: #fff; }
+.pill { display: inline-block; font-size: 18px; font-weight: 600; padding: 8px 14px; border-radius: 999px; margin-top: 16px; }
+.ok { color: var(--ok); background: var(--ok-bg); }
+.warn { color: var(--warn); background: var(--warn-bg); }
+.bad { color: var(--bad); background: var(--bad-bg); }
+.stamp { color: var(--muted); font-size: 14px; margin-top: 14px; display: flex; gap: 16px; flex-wrap: wrap; }
+.stamp a { color: var(--accent); }
+
+/* Μεγέθη */
+.sizes h3 { font-size: 16px; color: var(--muted); font-weight: 600; margin: 0 0 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.size {
+  text-align: left; font: inherit; cursor: pointer;
+  border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px;
+  background: var(--surface); color: var(--ink);
+}
+.size.current { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.size .v { font-size: 20px; font-weight: 700; }
+.size .p { font-size: 17px; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.size .p.sale { color: var(--sale); font-weight: 600; }
+.size .s { display: inline-block; font-size: 13px; font-weight: 600; margin-top: 6px; padding: 2px 8px; border-radius: 999px; }
+
+/* Λίστα αποτελεσμάτων */
+.list h3 { font-size: 18px; margin: 0 0 12px; font-weight: 600; }
+.row {
+  display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center;
+  width: 100%; text-align: left; font: inherit; color: var(--ink); cursor: pointer;
+  background: none; border: 0; border-top: 1px solid var(--line); padding: 12px 4px;
+}
+.row:first-of-type { border-top: 0; }
+.row img, .row .ph { width: 64px; height: 64px; object-fit: contain; background: #fff; border-radius: 8px; border: 1px solid var(--line); }
+.row .t { font-size: 17px; font-weight: 600; line-height: 1.3; }
+.row .k { font-size: 14px; color: var(--muted); margin-top: 2px; }
+.row .pr { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Καταστάσεις */
+.state { text-align: center; padding: 48px 20px; }
+.state .big { font-size: 26px; font-weight: 650; margin: 0 0 10px; }
+.state p { color: var(--muted); font-size: 18px; margin: 6px auto; max-width: 560px; line-height: 1.45; }
+.state .code { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--ink); }
+.state .btn { margin-top: 18px; }
+.spin { width: 36px; height: 36px; border-radius: 50%; border: 4px solid var(--line); border-top-color: var(--accent); margin: 0 auto 16px; animation: r 0.8s linear infinite; }
+@keyframes r { to { transform: rotate(360deg); } }
+
+/* Πρόσφατα */
+.recent h3 { font-size: 14px; color: var(--muted); font-weight: 600; margin: 0 0 8px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.chip {
+  flex: none; max-width: 260px; font: inherit; font-size: 14px; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px;
+  background: var(--surface); color: var(--ink); text-align: left;
+}
+.chip span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip b { font-variant-numeric: tabular-nums; }
+
+/* Κάμερα */
+#scanner { position: fixed; inset: 0; background: #000; z-index: 10; }
+#scanner[hidden] { display: none; }
+#scanner video { width: 100%; height: 100%; object-fit: cover; }
+#scanner .frame {
+  position: absolute; left: 12%; right: 12%; top: 32%; height: 30%;
+  border: 3px solid #fff; border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+}
+#scanner .hint { position: absolute; top: 18%; left: 0; right: 0; text-align: center; color: #fff; font-size: 20px; margin: 0; padding: 0 16px; }
+#scanner .camctl { position: absolute; left: 0; right: 0; bottom: 8%; display: flex; justify-content: center; gap: 14px; padding: 0 16px; }
+#scanner .btn { background: #fff; color: #111; border-color: #fff; min-width: 150px; }
+#scanner .btn.on { background: #ffd54a; border-color: #ffd54a; }
+</style>
+</head>
+<body>
+<div class="app">
+  <form class="bar" id="f" autocomplete="off">
+    <input id="q" type="search" enterkeyhint="search" placeholder="Σκανάρετε, ή γράψτε κωδικό ή όνομα"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button type="submit" class="btn">Αναζήτηση</button>
+  </form>
+  <main id="out"></main>
+  <section class="recent" id="recent" hidden>
+    <h3>Πρόσφατα</h3>
+    <div class="chips" id="chips"></div>
+  </section>
+</div>
+
+<button type="button" class="scanbtn" id="cam">Σκανάρισμα</button>
+
+<div id="scanner" hidden>
+  <video id="video" playsinline muted></video>
+  <div class="frame"></div>
+  <p class="hint" id="camHint">Στρέψτε την κάμερα στο barcode</p>
+  <div class="camctl">
+    <button type="button" class="btn" id="torch" hidden>Φακός</button>
+    <button type="button" class="btn" id="camClose">Κλείσιμο</button>
+  </div>
+</div>
+
+<!-- Προαιρετικός πίνακας barcode προς προϊόν, για όσα το barcode δεν είναι ο κωδικός του site -->
+<script src="barcodes.js"></script>
+<script>
+'use strict';
+
+// Μόνο ανάγνωση από το δημόσιο Store API του site. Το site δεν επιτρέπει fetch από άλλη
+// διεύθυνση (CORS), γι' αυτό η κλήση γίνεται με JSONP, λειτουργία του ίδιου του WordPress.
+const API = 'https://www.super-baby.gr/wp-json/wc/store/v1/products';
+const FIELDS = 'id,parent,type,sku,name,prices,is_in_stock,stock_availability,variation,images,permalink';
+const SIZE_FIELDS = 'id,sku,variation,prices,is_in_stock,stock_availability';
+const TIMEOUT_MS = 9000;
+
+const $ = id => document.getElementById(id);
+const out = $('out'), q = $('q');
+let seq = 0;          // μόνο η τελευταία αναζήτηση ζωγραφίζει
+let cbN = 0;
+
+// ---------- Βοηθητικά ----------
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat()) {
+    if (kid == null || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+const ta = document.createElement('textarea');
+function dec(s) { ta.innerHTML = s || ''; return ta.value; }
+
+function money(prices, amount) {
+  const unit = prices && prices.currency_minor_unit != null ? prices.currency_minor_unit : 2;
+  const v = parseInt(amount, 10) / Math.pow(10, unit);
+  if (!isFinite(v)) return '';
+  return v.toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+function onSale(pr) {
+  if (!pr) return false;
+  const p = parseInt(pr.price, 10), r = parseInt(pr.regular_price, 10);
+  return r > 0 && p > 0 && p < r;
+}
+function stockClass(sa, inStock) {
+  const c = (sa && sa.class) || '';
+  if (c.includes('out-of-stock')) return 'bad';
+  if (c.includes('backorder')) return 'warn';
+  return inStock === false ? 'bad' : 'ok';
+}
+function stockText(sa, inStock) {
+  const t = sa && sa.text ? sa.text.trim() : '';
+  if (t) return t;
+  return inStock === false ? 'Εξαντλημένο' : 'Διαθέσιμο';
+}
+function sizeLabel(variation) {
+  // «Μέγεθος: 17» -> «17». Αν έχει πολλά χαρακτηριστικά, τα κρατάει όλα.
+  return dec(variation || '').split(', ').map(x => x.replace(/^[^:]+:\s*/, '')).join(' / ');
+}
+function thumb(p) {
+  const im = p.images && p.images[0];
+  return im ? (im.thumbnail || im.src) : '';
+}
+function now() {
+  return new Date().toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+}
+// Χωρίς τόνους και πεζά, για σύγκριση ονομάτων
+function norm(s) {
+  return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/ς/g, 'σ').trim();
+}
+
+// Ελληνικό πληκτρολόγιο: γράμματα κωδικού που βγήκαν ελληνικά γυρίζουν στα λατινικά
+// της ίδιας θέσης, μόνο όταν το κείμενο μοιάζει με κωδικό.
+const GR = { 'α':'a','β':'b','ψ':'c','δ':'d','ε':'e','φ':'f','γ':'g','η':'h','ι':'i','ξ':'j','κ':'k','λ':'l','μ':'m',
+             'ν':'n','ο':'o','π':'p','ρ':'r','σ':'s','τ':'t','θ':'u','ω':'v','ς':'w','χ':'x','υ':'y','ζ':'z' };
+function toLatin(s) { return s.replace(/[α-ωάέήίόύώ]/gi, ch => GR[ch.toLowerCase()] || ch); }
+function looksLikeCode(s) { return /\d/.test(s) && !/\s/.test(s); }
+
+// ---------- JSONP ----------
+function jsonp(path) {
+  return new Promise((resolve, reject) => {
+    const cb = 'sbcb' + (++cbN);
+    const s = document.createElement('script');
+    const timer = setTimeout(() => { done(); reject(new Error('timeout')); }, TIMEOUT_MS);
+    function done() { clearTimeout(timer); delete window[cb]; s.remove(); }
+    window[cb] = data => { done(); resolve(data); };
+    s.onerror = () => { done(); reject(new Error('network')); };
+    s.src = API + path + (path.includes('?') ? '&' : '?') + '_jsonp=' + cb;
+    document.head.appendChild(s);
+  });
+}
+const enc = encodeURIComponent;
+
+// ---------- Αναζήτηση ----------
+async function lookup(raw) {
+  let s = String(raw || '').trim();
+  if (!s) return;
+  const my = ++seq;
+  const isCode = looksLikeCode(s);
+  if (isCode) s = toLatin(s).replace(/,/g, '');
+  showLoading(s);
+  try {
+    if (isCode) {
+      const r = await jsonp(`?sku=${enc(s)}&_fields=${FIELDS}`);
+      if (my !== seq) return;
+      const exact = (Array.isArray(r) ? r : []).filter(p => (p.sku || '').toLowerCase() === s.toLowerCase());
+      if (exact.length === 1) return showProduct(exact[0], my);
+      if (exact.length > 1) return showList(exact, `Ο κωδικός ${s} ανήκει σε ${exact.length} προϊόντα. Διαλέξτε:`, my);
+
+      const id = (window.SB_BARCODES || {})[s];
+      if (id) {
+        const p = await jsonp(`/${enc(id)}?_fields=${FIELDS}`);
+        if (my !== seq) return;
+        if (p && p.id) return showProduct(p, my);
+      }
+      if (s.length >= 5) {
+        const r2 = await jsonp(`?search=${enc(s)}&per_page=10&_fields=${FIELDS}`);
+        if (my !== seq) return;
+        if (Array.isArray(r2) && r2.length) {
+          return showList(r2, `Ο κωδικός ${s} δεν βρέθηκε ακριβώς. Μοιάζουν τα παρακάτω, ελέγξτε ότι είναι το ίδιο προϊόν:`, my);
+        }
+      }
+      return showNotFound(s);
+    }
+    let r = await jsonp(`?search=${enc(s)}&per_page=20&_fields=${FIELDS}`);
+    if (my !== seq) return;
+    // Το site ψάχνει τις λέξεις μόνο όταν είναι συνεχόμενες στο όνομα («dovadi fly» ναι,
+    // «fly truffle» όχι). Τότε ψάχνουμε με τη μεγαλύτερη λέξη και κρατάμε όσα έχουν όλες.
+    const words = norm(s).split(/\s+/).filter(Boolean);
+    if ((!Array.isArray(r) || !r.length) && words.length > 1) {
+      const longest = words.slice().sort((a, b) => b.length - a.length)[0];
+      const r2 = await jsonp(`?search=${enc(longest)}&per_page=100&_fields=${FIELDS}`);
+      if (my !== seq) return;
+      r = (Array.isArray(r2) ? r2 : []).filter(p => { const n = norm(dec(p.name)); return words.every(w => n.includes(w)); }).slice(0, 20);
+    }
+    if (Array.isArray(r) && r.length === 1) return showProduct(r[0], my);
+    if (Array.isArray(r) && r.length) return showList(r, `Αποτελέσματα για «${s}»`, my);
+    return showNotFound(s, true);
+  } catch (e) {
+    if (my === seq) showError(s);
+  }
+}
+
+async function openById(id) {
+  const my = ++seq;
+  showLoading('');
+  try {
+    const p = await jsonp(`/${enc(id)}?_fields=${FIELDS}`);
+    if (my !== seq) return;
+    if (p && p.id) showProduct(p, my); else showNotFound(String(id));
+  } catch (e) { if (my === seq) showError(String(id)); }
+}
+
+// ---------- Οθόνες ----------
+function setOut(...nodes) { out.replaceChildren(...nodes); }
+
+function showIdle() {
+  setOut(h('div', { class: 'card state' },
+    h('p', { class: 'big' }, 'Σκανάρετε ένα προϊόν'),
+    h('p', {}, 'Πατήστε «Σκανάρισμα» και στρέψτε την κάμερα στο barcode. Μπορείτε και να γράψετε κωδικό ή όνομα.'),
+    h('p', {}, 'Η τιμή έρχεται ζωντανά από το site τη στιγμή που σκανάρετε.')
+  ));
+}
+function showLoading(s) {
+  setOut(h('div', { class: 'card state' },
+    h('div', { class: 'spin' }),
+    h('p', {}, s ? ['Ψάχνω ', h('span', { class: 'code' }, s), ' στο site'] : 'Φορτώνει')
+  ));
+}
+function showNotFound(s, byName) {
+  setOut(h('div', { class: 'card state' },
+    h('p', { class: 'big' }, 'Δεν υπάρχει στο site'),
+    byName
+      ? h('p', {}, ['Κανένα προϊόν με όνομα ', h('span', { class: 'code' }, s), '. Δοκιμάστε λιγότερες λέξεις.'])
+      : h('p', {}, ['Ο κωδικός ', h('span', { class: 'code' }, s), ' δεν βρέθηκε.']),
+    h('p', {}, 'Αν το προϊόν πουλιέται μόνο στο κατάστημα, η τιμή του δεν είναι ακόμα εδώ.')
+  ));
+}
+function showError(s) {
+  setOut(h('div', { class: 'card state' },
+    h('p', { class: 'big' }, 'Το site δεν απάντησε'),
+    h('p', {}, 'Ελέγξτε το Wi-Fi του tablet και δοκιμάστε ξανά.'),
+    s ? h('button', { class: 'btn primary', type: 'button', onclick: () => lookup(s) }, 'Ξανά') : null
+  ));
+}
+
+function priceBlock(p) {
+  const pr = p.prices || {};
+  if (p.type === 'variable' && pr.price_range && pr.price_range.min_amount !== pr.price_range.max_amount) {
+    return [h('div', { class: 'price' },
+      h('small', {}, 'από '), money(pr, pr.price_range.min_amount),
+      h('small', {}, ' έως '), money(pr, pr.price_range.max_amount))];
+  }
+  const sale = onSale(pr);
+  const nodes = [h('div', { class: 'price' + (sale ? ' sale' : '') }, money(pr, pr.price))];
+  if (sale) {
+    const pct = Math.round((1 - parseInt(pr.price, 10) / parseInt(pr.regular_price, 10)) * 100);
+    nodes.push(h('div', { class: 'was' }, h('s', {}, money(pr, pr.regular_price)), h('span', { class: 'badge' }, '-' + pct + '%')));
+  }
+  return nodes;
+}
+
+function showProduct(p, my) {
+  const img = thumb(p);
+  const size = p.type === 'variation' ? sizeLabel(p.variation) : '';
+  const card = h('div', { class: 'card product' },
+    h('div', { class: 'img' }, img ? h('img', { src: img, alt: '' }) : h('span', {}, 'Χωρίς φωτογραφία')),
+    h('div', {},
+      h('h1', { class: 'name' }, dec(p.name)),
+      h('div', { class: 'meta' },
+        h('span', {}, 'Κωδικός ', h('b', {}, p.sku || '-')),
+        size ? h('span', {}, 'Μέγεθος ', h('b', {}, size)) : null),
+      priceBlock(p),
+      p.type === 'variable' ? null :
+        h('div', { class: 'pill ' + stockClass(p.stock_availability, p.is_in_stock) },
+          'Στο site: ' + stockText(p.stock_availability, p.is_in_stock)),
+      h('div', { class: 'stamp' },
+        h('span', {}, 'Τιμή site, ' + now()),
+        p.permalink ? h('a', { href: p.permalink, target: '_blank', rel: 'noopener' }, 'Άνοιγμα στο site') : null)
+    )
+  );
+  const sizesBox = h('div');
+  setOut(card, sizesBox);
+  addRecent(p);
+  const parentId = p.type === 'variation' ? p.parent : (p.type === 'variable' ? p.id : 0);
+  if (parentId) loadSizes(parentId, p.id, sizesBox, my);
+}
+
+async function loadSizes(parentId, currentId, box, my) {
+  try {
+    const r = await jsonp(`?parent=${enc(parentId)}&type=variation&per_page=100&_fields=${SIZE_FIELDS}`);
+    if (my !== seq || !Array.isArray(r) || r.length < 1) return;
+    r.sort((a, b) => sizeLabel(a.variation).localeCompare(sizeLabel(b.variation), 'el', { numeric: true }));
+    box.replaceWith(h('div', { class: 'card sizes' },
+      h('h3', {}, 'Όλα τα μεγέθη στο site'),
+      h('div', { class: 'grid' }, r.map(v => {
+        const sale = onSale(v.prices);
+        const cls = stockClass(v.stock_availability, v.is_in_stock);
+        return h('button', { type: 'button', class: 'size' + (v.id === currentId ? ' current' : ''), onclick: () => openById(v.id) },
+          h('div', { class: 'v' }, sizeLabel(v.variation) || v.sku),
+          h('div', { class: 'p' + (sale ? ' sale' : '') }, money(v.prices, v.prices && v.prices.price)),
+          h('span', { class: 's ' + cls }, stockText(v.stock_availability, v.is_in_stock)));
+      }))
+    ));
+  } catch (e) { /* τα μεγέθη είναι βοήθημα, η κύρια τιμή έχει ήδη φανεί */ }
+}
+
+function showList(items, title, my) {
+  items = items.slice().sort((a, b) => (a.type === 'variation') - (b.type === 'variation'));
+  setOut(h('div', { class: 'card list' },
+    h('h3', {}, title),
+    items.map(p => {
+      const img = thumb(p);
+      const size = p.type === 'variation' ? sizeLabel(p.variation) : '';
+      return h('button', { type: 'button', class: 'row', onclick: () => { if (my === seq) { ++seq; showProduct(p, seq); } } },
+        img ? h('img', { src: img, alt: '' }) : h('div', { class: 'ph' }),
+        h('div', {},
+          h('div', { class: 't' }, dec(p.name)),
+          h('div', { class: 'k' }, (p.sku || '-') + (size ? ' · Μέγεθος ' + size : ''))),
+        h('div', { class: 'pr' }, money(p.prices, p.prices && p.prices.price)));
+    })
+  ));
+}
+
+// ---------- Πρόσφατα ----------
+let recent = [];
+try { recent = JSON.parse(localStorage.getItem('sb_recent') || '[]'); } catch (e) { recent = []; }
+function addRecent(p) {
+  const size = p.type === 'variation' ? sizeLabel(p.variation) : '';
+  const item = { id: p.id, name: dec(p.name) + (size ? ' · ' + size : ''), price: money(p.prices, p.prices && p.prices.price) };
+  recent = [item].concat(recent.filter(x => x.id !== p.id)).slice(0, 8);
+  try { localStorage.setItem('sb_recent', JSON.stringify(recent)); } catch (e) {}
+  drawRecent();
+}
+function drawRecent() {
+  $('recent').hidden = recent.length === 0;
+  $('chips').replaceChildren(...recent.map(x =>
+    h('button', { type: 'button', class: 'chip', onclick: () => openById(x.id) },
+      h('span', {}, x.name), h('b', {}, x.price))));
+}
+
+// ---------- Πληκτρολόγηση και σκάνερ ----------
+$('f').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = q.value;
+  q.value = '';
+  q.blur();
+  lookup(v);
+});
+
+// Ο σκάνερ γράφει σαν πληκτρολόγιο, πολύ γρήγορα, και ο σκάνερ του ταμείου δεν στέλνει Enter.
+// Πιάνουμε τη ριπή από την ταχύτητα, όπου κι αν είναι η εστίαση. Διαβάζουμε το φυσικό
+// πλήκτρο (e.code) και όχι το γράμμα, ώστε να μη μας πειράζει το ελληνικό πληκτρολόγιο.
+let burst = '', gaps = [], lastKeyAt = 0, burstTimer = 0;
+function keyChar(e) {
+  const c = e.code || '';
+  if (/^Key[A-Z]$/.test(c)) return e.shiftKey ? c[3] : c[3].toLowerCase();
+  if (/^(Digit|Numpad)[0-9]$/.test(c)) return c.slice(-1);
+  const m = { Minus: e.shiftKey ? '_' : '-', NumpadSubtract: '-', Period: '.', NumpadDecimal: '.', Slash: '/', NumpadDivide: '/' };
+  if (m[c] !== undefined) return m[c];
+  if (e.key && e.key.length === 1 && e.key !== ' ') return e.key;
+  return null;
+}
+function finishBurst() {
+  clearTimeout(burstTimer);
+  const code = burst;
+  const avg = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 999;
+  const isScan = code.length >= 6 && gaps.length >= code.length - 2 && avg < 35;
+  burst = ''; gaps = [];
+  if (!isScan) return false;
+  if (document.activeElement === q) { q.value = ''; q.blur(); }
+  lookup(code);
+  return true;
+}
+document.addEventListener('keydown', e => {
+  if (!$('scanner').hidden || e.ctrlKey || e.altKey || e.metaKey) return;
+  const t = performance.now();
+  if (e.key === 'Enter') {
+    if (burst && finishBurst()) e.preventDefault();
+    return;
+  }
+  const ch = keyChar(e);
+  if (ch === null) return;
+  if (t - lastKeyAt > 60) { burst = ''; gaps = []; } else gaps.push(t - lastKeyAt);
+  burst += ch;
+  lastKeyAt = t;
+  clearTimeout(burstTimer);
+  burstTimer = setTimeout(finishBurst, 90);
+}, true);
+
+// ---------- Κάμερα ----------
+const ZXING_URL = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js';
+let stream = null, camTimer = 0, zx = null, lastRead = '', lastReadAt = 0;
+
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+function onRead(value) {
+  value = String(value || '').trim();
+  if (!value) return;
+  const t = performance.now();
+  // Δύο ίδιες αναγνώσεις στη σειρά, για να μην περάσει ποτέ μισοδιαβασμένο barcode.
+  if (value === lastRead && t - lastReadAt < 1500) {
+    closeCamera();
+    feedback();
+    lookup(value);
+  } else { lastRead = value; lastReadAt = t; }
+}
+async function openCamera() {
+  unlockAudio();
+  lastRead = '';
+  $('camHint').textContent = 'Στρέψτε την κάμερα στο barcode';
+  $('scanner').hidden = false;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+  } catch (e) {
+    closeCamera();
+    setOut(h('div', { class: 'card state' },
+      h('p', { class: 'big' }, 'Η κάμερα δεν άνοιξε'),
+      h('p', {}, 'Επιτρέψτε την πρόσβαση στην κάμερα στον Chrome, ή χρησιμοποιήστε σκάνερ.')));
+    return;
+  }
+  const video = $('video');
+  video.srcObject = stream;
+  try { await video.play(); } catch (e) {}
+
+  // Συνεχής εστίαση για τα κοντινά barcode, και φακός όπου το tablet τον έχει
+  const track = stream.getVideoTracks()[0];
+  const caps = (track && track.getCapabilities) ? track.getCapabilities() : {};
+  if (caps.focusMode && caps.focusMode.includes('continuous')) {
+    try { await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); } catch (e) {}
+  }
+  $('torch').hidden = !caps.torch;
+
+  if ('BarcodeDetector' in window) {
+    let formats = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'codabar'];
+    try { const sup = await BarcodeDetector.getSupportedFormats(); formats = formats.filter(f => sup.includes(f)); } catch (e) {}
+    if (formats.length) {
+      const det = new BarcodeDetector({ formats });
+      const tick = async () => {
+        if (!stream) return;
+        try { const codes = await det.detect(video); if (codes.length) onRead(codes[0].rawValue); } catch (e) {}
+        if (stream) camTimer = setTimeout(tick, 120);
+      };
+      tick();
+      return;
+    }
+  }
+  // Χωρίς ενσωματωμένο αναγνώστη, π.χ. Chrome σε Windows: βιβλιοθήκη ZXing.
+  try {
+    if (!window.ZXingBrowser) { $('camHint').textContent = 'Φορτώνει ο αναγνώστης'; await loadScript(ZXING_URL); }
+    if (!stream) return;
+    $('camHint').textContent = 'Στρέψτε την κάμερα στο barcode';
+    const reader = new ZXingBrowser.BrowserMultiFormatReader();
+    zx = await reader.decodeFromStream(stream, video, res => { if (res) onRead(res.getText()); });
+  } catch (e) {
+    $('camHint').textContent = 'Ο αναγνώστης δεν φόρτωσε. Χρησιμοποιήστε σκάνερ ή πληκτρολόγηση.';
+  }
+}
+function closeCamera() {
+  clearTimeout(camTimer);
+  if (zx) { try { zx.stop(); } catch (e) {} zx = null; }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  $('video').srcObject = null;
+  $('scanner').hidden = true;
+  torchOn = false;
+  $('torch').classList.remove('on');
+}
+let torchOn = false;
+$('torch').addEventListener('click', async () => {
+  const track = stream && stream.getVideoTracks()[0];
+  if (!track) return;
+  try {
+    await track.applyConstraints({ advanced: [{ torch: !torchOn }] });
+    torchOn = !torchOn;
+    $('torch').classList.toggle('on', torchOn);
+  } catch (e) {}
+});
+$('cam').addEventListener('click', openCamera);
+$('camClose').addEventListener('click', closeCamera);
+
+// Ήχος και δόνηση όταν διαβαστεί κωδικός
+let audio = null;
+function unlockAudio() {
+  try { if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); } catch (e) {}
+}
+function feedback() {
+  try { navigator.vibrate && navigator.vibrate(60); } catch (e) {}
+  try {
+    if (!audio) return;
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.frequency.value = 1320; g.gain.value = 0.08;
+    o.connect(g); g.connect(audio.destination);
+    o.start(); o.stop(audio.currentTime + 0.09);
+  } catch (e) {}
+}
+
+// Η οθόνη του tablet να μη σβήνει όσο είναι ανοιχτή η σελίδα
+let wakeLock = null;
+async function keepAwake() {
+  try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch (e) {}
+}
+document.addEventListener('pointerdown', () => { unlockAudio(); keepAwake(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
+
+showIdle();
+drawRecent();
+</script>
+</body>
+</html>
