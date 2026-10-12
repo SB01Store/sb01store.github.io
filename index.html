@@ -231,7 +231,7 @@ body {
 <!-- Προαιρετικός πίνακας barcode προς προϊόν, για όσα το barcode δεν είναι ο κωδικός του site -->
 <script src="barcodes.js?v=2026-10-10b"></script>
 <!-- Λίστα καταστήματος: προϊόντα εκτός site με τιμή καταλόγου του προμηθευτή -->
-<script src="katastima.js?v=2026-10-10h"></script>
+<script src="katastima.js?v=2026-10-12"></script>
 <script>
 'use strict';
 
@@ -350,7 +350,20 @@ async function lookup(raw) {
 
       // Μετά το site, η λίστα καταστήματος: προϊόντα που δεν είναι στο site, με τιμή καταλόγου
       const st = storeItem(s);
-      if (st) return showStoreItem(st, s);
+      if (st) {
+        // ΠΟΤΕ τιμή καταστήματος για προϊόν που είναι στο site (απόφαση Δημήτρη 12/10/2026). Αν ανέβηκε
+        // στο site μετά την τελευταία ανανέωση της λίστας, το βρίσκουμε με τον κωδικό του προμηθευτή.
+        const code = String(st.row[1] || '');
+        if (code && code.toUpperCase() !== s.toUpperCase()) {
+          try {
+            const r3 = await jsonp(`?sku=${enc(code)}&_fields=${FIELDS}`);
+            if (my !== seq) return;
+            const ex = (Array.isArray(r3) ? r3 : []).filter(p => (p.sku || '').toLowerCase() === code.toLowerCase());
+            if (ex.length === 1) return showProduct(ex[0], my);
+          } catch (e) { /* αν το site δεν απαντήσει εδώ, δείχνουμε την τιμή καταστήματος όπως πριν */ }
+        }
+        return showStoreItem(st, s);
+      }
 
       if (s.length >= 5) {
         const r2 = await jsonp(`?search=${enc(s)}&per_page=10&_fields=${FIELDS}`);
