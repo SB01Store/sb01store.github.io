@@ -105,6 +105,12 @@ body {
 .price small { font-size: 0.4em; font-weight: 600; color: var(--muted); letter-spacing: 0; }
 .was { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .was s { font-size: 22px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.was .rrp { font-size: 15px; font-weight: 600; color: var(--muted); }
+.storeoff { margin-top: 16px; padding: 10px 16px; border-radius: 14px; background: var(--warn-bg); border: 3px solid var(--warn); color: var(--warn); }
+.storeoff .lbl { font-size: 15px; font-weight: 800; letter-spacing: 0.03em; }
+.storeoff .v { font-size: 44px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.storeoff .v.small { font-size: 18px; font-weight: 700; }
+.size .so { font-size: 14px; font-weight: 800; color: var(--warn); }
 .badge { font-weight: 700; font-size: 18px; padding: 4px 10px; border-radius: 8px; background: var(--sale); color: #fff; }
 .pill { display: inline-block; font-size: 18px; font-weight: 600; padding: 8px 14px; border-radius: 999px; margin-top: 16px; }
 .ok { color: var(--ok); background: var(--ok-bg); }
@@ -139,6 +145,10 @@ body {
 .row .t { font-size: 17px; font-weight: 600; line-height: 1.3; }
 .row .k { font-size: 14px; color: var(--muted); margin-top: 2px; }
 .row .pr { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.row.store .ph { background: var(--warn-bg); border-color: var(--warn); }
+.row.store .pr { color: var(--warn); }
+.row .tag { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: 0.03em; color: var(--warn-bg); background: var(--warn); border-radius: 6px; padding: 1px 6px; margin-right: 6px; }
+.list h4 { font-size: 15px; margin: 18px 0 4px; font-weight: 700; color: var(--warn); }
 
 /* Καταστάσεις */
 .state { text-align: center; padding: 48px 20px; }
@@ -231,7 +241,8 @@ body {
 <!-- Προαιρετικός πίνακας barcode προς προϊόν, για όσα το barcode δεν είναι ο κωδικός του site -->
 <script src="barcodes.js?v=2026-10-10b"></script>
 <!-- Λίστα καταστήματος: προϊόντα εκτός site με τιμή καταλόγου του προμηθευτή -->
-<script src="katastima.js?v=2026-10-12b"></script>
+<script src="katastima.js?v=2026-10-13a"></script>
+<script src="rrp.js?v=2026-10-13a"></script>
 <script>
 'use strict';
 
@@ -326,12 +337,14 @@ function jsonp(path) {
 const enc = encodeURIComponent;
 
 // ---------- Αναζήτηση ----------
+let lastLookup = '';
 async function lookup(raw) {
   let s = String(raw || '').trim();
   if (!s) return;
   const my = ++seq;
   const isCode = looksLikeCode(s);
   if (isCode) s = toLatin(s).replace(/,/g, '');
+  lastLookup = s;
   showLoading(s);
   try {
     if (isCode) {
@@ -385,8 +398,12 @@ async function lookup(raw) {
       if (my !== seq) return;
       r = (Array.isArray(r2) ? r2 : []).filter(p => { const n = norm(dec(p.name)); return words.every(w => n.includes(w)); }).slice(0, 20);
     }
-    if (Array.isArray(r) && r.length === 1) return showProduct(r[0], my);
-    if (Array.isArray(r) && r.length) return showList(r, `Αποτελέσματα για «${s}»`, my);
+    if (!Array.isArray(r)) r = [];
+    // Και η λίστα καταστήματος, με όνομα: μετά το site, ποτέ στη θέση του
+    const st = storeSearch(words);
+    if (r.length === 1 && !st.length) return showProduct(r[0], my);
+    if (!r.length && st.length === 1) return showStoreItem(st[0]);
+    if (r.length || st.length) return showList(r, `Αποτελέσματα για «${s}»`, my, st);
     return showNotFound(s, true);
   } catch (e) {
     if (my === seq) showError(s);
@@ -445,12 +462,77 @@ function priceBlock(p) {
       h('small', {}, ' έως '), money(pr, pr.price_range.max_amount))];
   }
   const sale = onSale(pr);
-  const nodes = [h('div', { class: 'price' + (sale ? ' sale' : '') }, money(pr, pr.price))];
+  // Χωρίς προσφορά στο site: αν η προτεινόμενη λιανική είναι πιο ψηλά, η τιμή του site φαίνεται ως
+  // προσφορά απέναντι σε αυτήν, με την ένδειξη «Προτεινόμενη λιανική» (Δημήτρης 13/10/2026)
+  const unit = pr.currency_minor_unit != null ? pr.currency_minor_unit : 2;
+  const rrp = (window.SB_RRP || {})[String(p.sku || '').toUpperCase()];
+  const rrpMinor = rrp ? Math.round(rrp * Math.pow(10, unit)) : 0;
+  const cur = parseInt(pr.price, 10);
+  const vsRrp = !sale && rrpMinor > 0 && cur > 0 && rrpMinor > cur;
+  const nodes = [h('div', { class: 'price' + (sale || vsRrp ? ' sale' : '') }, money(pr, pr.price))];
   if (sale) {
     const pct = Math.round((1 - parseInt(pr.price, 10) / parseInt(pr.regular_price, 10)) * 100);
     nodes.push(h('div', { class: 'was' }, h('s', {}, money(pr, pr.regular_price)), pct >= 1 ? h('span', { class: 'badge' }, '-' + pct + '%') : null));
+  } else if (vsRrp) {
+    const pct = Math.round((1 - cur / rrpMinor) * 100);
+    nodes.push(h('div', { class: 'was' }, h('span', { class: 'rrp' }, 'Προτεινόμενη λιανική'), h('s', {}, money(pr, rrpMinor)), pct >= 1 ? h('span', { class: 'badge' }, '-' + pct + '%') : null));
   }
   return nodes;
+}
+
+// Τιμή καταστήματος για ρούχα και Tender, από την αναγραφόμενη (= αρχική του site, ίδια με την «Κανονική
+// Τιμή» του manage-orders). Οι κανόνες βγήκαν από τις τιμές πώλησης του manage-orders, σεζόν winter 2026 και
+// Φθινόπωρο Χειμώνας 26-27, και ταιριάζουν σε όλα (Δημήτρης 13/10/2026). Στρογγυλό ευρώ: «up» το ,50 πάει
+// πάνω, «down» το ,50 πάει κάτω, όπως τα έχει ο ίδιος. Ποτέ πάνω από την τρέχουσα τιμή του site.
+// Zippy: όχι κανόνας, η χαμηλότερη από τις τιμές της Zippy, ανά αρχική τιμή, όπως είναι στο manage-orders.
+const ZIPPY_PRICES = { '6.99': 4.99, '9.99': 7.99, '12.99': 9.99, '14.99': 10.99, '15.99': 12.99, '17.99': 14.99,
+  '19.99': 15.99, '22.99': 17.99, '25.99': 19.99, '27.99': 22.99, '32.99': 25.99, '34.99': 27.99, '37.99': 29.99,
+  '42.99': 34.99, '45.99': 35.99, '47.99': 37.99, '49.99': 39.99, '57.99': 45.99 };
+const STORE_RULES = [
+  [/\bmayoral\b/i, { pct: 20, half: 'up' }],
+  [/^tender\b/i, { pct: 20, half: 'up' }],
+  [/\bjoyce\b/i, { pct: 10, half: 'down' }],
+  [/abel\s*(&|and|και)\s*lula/i, { pct: 10, half: 'up' }],
+  [/\bzippy\b/i, { table: ZIPPY_PRICES }],
+];
+// Εξαιρέσεις με δική τους τιμή στο manage-orders: αξεσουάρ Mayoral στο -10% (κουβέρτες Πον Πον, σακίδια)
+const STORE_EXCEPT = {
+  '16-09143-072': 32, '16-09143-073': 32, '16-09143-074': 32, '8447658202912': 32, '8447658202929': 32, '8447658202936': 32,
+  '16-09160-033': 25, '16-09160-034': 25, '16-09162-081': 25, '16-09162-082': 25, '16-09162-083': 25,
+  '8447658204541': 25, '8447658204558': 25, '8447658204718': 25, '8447658204725': 25, '8447658204732': 25 };
+function storeOff(name) { for (const [rx, rule] of STORE_RULES) if (rx.test(name)) return rule; return null; }
+function storeEuro(pr, rule, codes) {
+  if (!pr || !parseInt(pr.price, 10)) return null;
+  const unit = pr.currency_minor_unit != null ? pr.currency_minor_unit : 2;
+  const now = parseInt(pr.price, 10) / Math.pow(10, unit);
+  const base = (onSale(pr) ? parseInt(pr.regular_price, 10) : parseInt(pr.price, 10)) / Math.pow(10, unit);
+  let v = null;
+  for (const c of codes || []) if (c && STORE_EXCEPT[String(c).toUpperCase()] != null) { v = STORE_EXCEPT[String(c).toUpperCase()]; break; }
+  // Το site έχει τις αρχικές της Zippy στρογγυλές (26,00 αντί για 25,99 του manage-orders): ανοχή 1 λεπτού
+  if (v == null && rule.table) {
+    const k = Object.keys(rule.table).find(k => Math.abs(Number(k) - base) < 0.015);
+    if (k) v = rule.table[k];
+  }
+  if (v == null && rule.pct) {
+    const x = Math.round(base * (100 - rule.pct)) / 100;
+    v = rule.half === 'down' ? Math.ceil(x - 0.5) : Math.floor(x + 0.5);
+  }
+  return v == null ? null : { v: Math.min(v, now), base };
+}
+const eur2 = v => Number(v).toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+function storeOffBlock(p, scanned) {
+  const rule = storeOff(dec(p.name));
+  if (!rule) return null;
+  const pr = p.prices || {};
+  const label = h('div', { class: 'lbl' }, 'ΣΤΟ ΚΑΤΑΣΤΗΜΑ');
+  if (p.type === 'variable' && pr.price_range && pr.price_range.min_amount !== pr.price_range.max_amount) {
+    return h('div', { class: 'storeoff' }, label, h('div', { class: 'v small' }, 'Η τιμή κάθε μεγέθους είναι πιο κάτω'));
+  }
+  const r = storeEuro(pr, rule, [scanned, p.sku]);
+  if (!r) return null;
+  const pct = Math.round((1 - r.v / r.base) * 100);
+  return h('div', { class: 'storeoff' }, label, h('div', { class: 'v' }, eur2(r.v)),
+    pct >= 1 ? h('div', { class: 'v small' }, `-${pct}% από την αναγραφόμενη ${eur2(r.base)}`) : null);
 }
 
 function showProduct(p, my) {
@@ -465,6 +547,7 @@ function showProduct(p, my) {
         size ? h('span', {}, 'Μέγεθος ', h('b', {}, size)) : null),
       h('div', { class: 'pricelabel' }, 'Τιμή site'),
       priceBlock(p),
+      storeOffBlock(p, lastLookup),
       p.type === 'variable' ? null :
         h('div', { class: 'pill ' + stockClass(p.stock_availability, p.is_in_stock) },
           'Στο site: ' + stockText(p.stock_availability, p.is_in_stock)),
@@ -477,7 +560,7 @@ function showProduct(p, my) {
   setOut(card, sizesBox);
   addRecent(p);
   const parentId = p.type === 'variation' ? p.parent : (p.type === 'variable' ? p.id : 0);
-  if (parentId) loadSizes(parentId, p.id, sizesBox, my);
+  if (parentId) loadSizes(parentId, p.id, sizesBox, my, storeOff(dec(p.name)));
 }
 
 // ---------- Λίστα καταστήματος ----------
@@ -489,9 +572,22 @@ function storeItem(code) {
   const e = storeBySku[String(code).toUpperCase()];
   return e ? { ean: e, row: L[e] } : null;
 }
+// Με όνομα: όσα έχουν όλες τις λέξεις στο όνομα ή στον κωδικό, ένα ανά προϊόν (τα μεγέθη δείχνουν στο ίδιο)
+function storeSearch(words) {
+  if (!words.length) return [];
+  const L = window.SB_KATASTIMA || {}, seen = new Set(), out = [];
+  for (const [e, row] of Object.entries(L)) {
+    const key = String(row[1] || e).toUpperCase();
+    if (seen.has(key)) continue;
+    const n = norm(row[0] + ' ' + row[1]);
+    if (words.every(w => n.includes(w))) { seen.add(key); out.push({ ean: e, row }); if (out.length >= 30) break; }
+  }
+  return out;
+}
 function showStoreItem(st) {
-  // [όνομα, κωδικός, τιμή, πηγή, ημερομηνία λίστας, αρχική τιμή ή 0, k = τιμή καταλόγου / s = τιμή καταστήματος]
-  const [name, sku, price, source, date, regular, kind] = st.row;
+  // [όνομα, κωδικός, τιμή, πηγή, ημερομηνία λίστας, αρχική τιμή ή 0, k = τιμή καταλόγου / s = τιμή καταστήματος,
+  //  p = η αρχική είναι η προτεινόμενη λιανική]
+  const [name, sku, price, source, date, regular, kind, rkind] = st.row;
   const eur = v => Number(v).toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   const d = String(date).split('-').reverse().join('/');
   const sale = regular && Number(regular) > Number(price);
@@ -507,13 +603,13 @@ function showStoreItem(st) {
         hasEan ? h('span', {}, 'Barcode ', h('b', {}, st.ean)) : null),
       h('div', { class: 'pricelabel' }, 'Τιμή καταστήματος'),
       h('div', { class: 'price' + (sale ? ' sale' : '') }, eur(price)),
-      sale ? h('div', { class: 'was' }, h('s', {}, eur(regular)), pct >= 1 ? h('span', { class: 'badge' }, '-' + pct + '%') : null) : null,
+      sale ? h('div', { class: 'was' }, rkind === 'p' ? h('span', { class: 'rrp' }, 'Προτεινόμενη λιανική') : null, h('s', {}, eur(regular)), pct >= 1 ? h('span', { class: 'badge' }, '-' + pct + '%') : null) : null,
       h('div', { class: 'stamp' }, h('span', {}, (kind === 's' ? '' : 'Τιμή καταλόγου ' + source + ', ') + 'λίστα της ' + d + ', δεν αλλάζει μόνη της')))
   ));
   pushRecent({ code: hasEan ? st.ean : sku, name: name + ' (κατάστημα)', price: eur(price) });
 }
 
-async function loadSizes(parentId, currentId, box, my) {
+async function loadSizes(parentId, currentId, box, my, rule) {
   try {
     const r = await jsonp(`?parent=${enc(parentId)}&type=variation&per_page=100&_fields=${SIZE_FIELDS}`);
     if (my !== seq || !Array.isArray(r) || r.length < 1) return;
@@ -523,17 +619,21 @@ async function loadSizes(parentId, currentId, box, my) {
       h('div', { class: 'grid' }, r.map(v => {
         const sale = onSale(v.prices);
         const cls = stockClass(v.stock_availability, v.is_in_stock);
+        const so = rule ? storeEuro(v.prices, rule, [v.sku]) : null;
         return h('button', { type: 'button', class: 'size' + (v.id === currentId ? ' current' : ''), onclick: () => openById(v.id) },
           h('div', { class: 'v' }, sizeLabel(v.variation) || v.sku),
           h('div', { class: 'p' + (sale ? ' sale' : '') }, money(v.prices, v.prices && v.prices.price)),
+          so ? h('div', { class: 'so' }, 'Κατάστημα ' + eur2(so.v)) : null,
           h('span', { class: 's ' + cls }, stockText(v.stock_availability, v.is_in_stock)));
       }))
     ));
   } catch (e) { /* τα μεγέθη είναι βοήθημα, η κύρια τιμή έχει ήδη φανεί */ }
 }
 
-function showList(items, title, my) {
+function showList(items, title, my, store) {
   items = items.slice().sort((a, b) => (a.type === 'variation') - (b.type === 'variation'));
+  store = store || [];
+  const eur = v => Number(v).toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   setOut(h('div', { class: 'card list' },
     h('h3', {}, title),
     items.map(p => {
@@ -545,7 +645,14 @@ function showList(items, title, my) {
           h('div', { class: 't' }, dec(p.name)),
           h('div', { class: 'k' }, (p.sku || '-') + (size ? ' · Μέγεθος ' + size : ''))),
         h('div', { class: 'pr' }, money(p.prices, p.prices && p.prices.price)));
-    })
+    }),
+    store.length ? h('h4', {}, items.length ? 'Μόνο στο κατάστημα, δεν είναι στο site' : 'Δεν είναι στο site, μόνο στο κατάστημα') : null,
+    store.map(st => h('button', { type: 'button', class: 'row store', onclick: () => { if (my === seq) { ++seq; showStoreItem(st); } } },
+      h('div', { class: 'ph' }),
+      h('div', {},
+        h('div', { class: 't' }, st.row[0]),
+        h('div', { class: 'k' }, h('span', { class: 'tag' }, 'ΚΑΤΑΣΤΗΜΑ'), (st.row[1] || '-'))),
+      h('div', { class: 'pr' }, eur(st.row[2]))))
   ));
 }
 
@@ -665,8 +772,15 @@ document.addEventListener('keydown', e => {
 }, true);
 
 // ---------- Κάμερα ----------
+// Ενσωματωμένος αναγνώστης όπου υπάρχει (Chrome σε Android). Αλλιώς, π.χ. Safari σε iPhone, ο ίδιος
+// αναγνώστης σε WebAssembly (ZXing C++), πολύ πιο γρήγορος από την παλιά βιβλιοθήκη JavaScript.
+const WASM_DETECTOR_URL = 'https://cdn.jsdelivr.net/npm/barcode-detector@3.2.2/dist/es/ponyfill.js';
 const ZXING_URL = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js';
-let stream = null, camTimer = 0, zx = null, lastRead = '', lastReadAt = 0;
+// Μόνο τα είδη barcode που έχουν τα προϊόντα μας: λιγότερα είδη, πιο γρήγορη και πιο σίγουρη ανάγνωση
+const SCAN_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'];
+let stream = null, camTimer = 0, zx = null, lastRead = '', lastReadAt = 0, detector = null, detectorP = null;
+// Ένα φόρτωμα του αναγνώστη για όλη τη σελίδα, όποιος τον ζητήσει πρώτος
+function getDetector() { return detectorP || (detectorP = makeDetector()); }
 
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -675,12 +789,14 @@ function loadScript(src) {
     document.head.appendChild(s);
   });
 }
-function onRead(value) {
+function onRead(value, format) {
   value = String(value || '').trim();
   if (!value) return;
   const t = performance.now();
-  // Δύο ίδιες αναγνώσεις στη σειρά, για να μην περάσει ποτέ μισοδιαβασμένο barcode.
-  if (value === lastRead && t - lastReadAt < 1500) {
+  // EAN και UPC έχουν ψηφίο ελέγχου που ο αναγνώστης ήδη ελέγχει: μία ανάγνωση φτάνει. Στα υπόλοιπα
+  // (Code 128) δύο ίδιες αναγνώσεις στη σειρά, για να μην περάσει ποτέ μισοδιαβασμένο barcode.
+  const checked = /^(ean_13|ean_8|upc_a|upc_e)$/.test(format || '') && /^\d{8}$|^\d{12,13}$/.test(value);
+  if (checked || (value === lastRead && t - lastReadAt < 1500)) {
     closeCamera();
     feedback();
     lookup(value);
@@ -693,7 +809,7 @@ async function openCamera() {
   $('scanner').hidden = false;
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
   } catch (e) {
     closeCamera();
     setOut(h('div', { class: 'card state' },
@@ -713,30 +829,56 @@ async function openCamera() {
   }
   $('torch').hidden = !caps.torch;
 
-  if ('BarcodeDetector' in window) {
-    let formats = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'codabar'];
-    try { const sup = await BarcodeDetector.getSupportedFormats(); formats = formats.filter(f => sup.includes(f)); } catch (e) {}
-    if (formats.length) {
-      const det = new BarcodeDetector({ formats });
-      const tick = async () => {
-        if (!stream) return;
-        try { const codes = await det.detect(video); if (codes.length) onRead(codes[0].rawValue); } catch (e) {}
-        if (stream) camTimer = setTimeout(tick, 120);
-      };
-      tick();
-      return;
-    }
+  if (!detector) { $('camHint').textContent = 'Φορτώνει ο αναγνώστης'; detector = await getDetector(); }
+  if (!stream) return;
+  if (detector) {
+    $('camHint').textContent = 'Στρέψτε την κάμερα στο barcode';
+    // Διαβάζουμε μόνο τη μέση της εικόνας, εκεί που είναι το πλαίσιο, μικραμένη: πιο γρήγορα, και δεν
+    // πιάνει κατά λάθος διπλανό barcode. Κάθε ~60 ms, χωρίς να ξεκινά νέα ανάγνωση πριν τελειώσει η προηγούμενη.
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const tick = async () => {
+      if (!stream) return;
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (vw && vh) {
+        const sx = Math.round(vw * 0.08), sw = vw - 2 * sx;
+        const sy = Math.round(vh * 0.22), sh = Math.round(vh * 0.52);
+        const scale = Math.min(1, 960 / sw);
+        canvas.width = Math.round(sw * scale); canvas.height = Math.round(sh * scale);
+        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+        try {
+          const codes = await detector.detect(canvas);
+          if (codes.length) onRead(codes[0].rawValue, codes[0].format);
+        } catch (e) {}
+      }
+      if (stream) camTimer = setTimeout(tick, 60);
+    };
+    tick();
+    return;
   }
-  // Χωρίς ενσωματωμένο αναγνώστη, π.χ. Chrome σε Windows: βιβλιοθήκη ZXing.
+  // Τελευταία λύση, αν δεν φόρτωσε ο γρήγορος αναγνώστης: η παλιά βιβλιοθήκη ZXing.
   try {
     if (!window.ZXingBrowser) { $('camHint').textContent = 'Φορτώνει ο αναγνώστης'; await loadScript(ZXING_URL); }
     if (!stream) return;
     $('camHint').textContent = 'Στρέψτε την κάμερα στο barcode';
-    const reader = new ZXingBrowser.BrowserMultiFormatReader();
+    const reader = new ZXingBrowser.BrowserMultiFormatReader(undefined, { delayBetweenScanAttempts: 100 });
     zx = await reader.decodeFromStream(stream, video, res => { if (res) onRead(res.getText()); });
   } catch (e) {
     $('camHint').textContent = 'Ο αναγνώστης δεν φόρτωσε. Χρησιμοποιήστε σκάνερ ή πληκτρολόγηση.';
   }
+}
+async function makeDetector() {
+  if ('BarcodeDetector' in window) {
+    try {
+      const sup = await BarcodeDetector.getSupportedFormats();
+      const formats = SCAN_FORMATS.filter(f => sup.includes(f));
+      if (formats.includes('ean_13')) return new BarcodeDetector({ formats });
+    } catch (e) {}
+  }
+  try {
+    const mod = await import(WASM_DETECTOR_URL);
+    return new mod.BarcodeDetector({ formats: SCAN_FORMATS });
+  } catch (e) { return null; }
 }
 function closeCamera() {
   clearTimeout(camTimer);
@@ -759,6 +901,15 @@ $('torch').addEventListener('click', async () => {
 });
 $('cam').addEventListener('click', openCamera);
 $('camClose').addEventListener('click', closeCamera);
+// Ο αναγνώστης φορτώνει και «ζεσταίνεται» μόλις ανοίξει η σελίδα, για να μην περιμένει η πρώτη σάρωση
+// τα 3-4 δευτερόλεπτα του πρώτου φορτώματος (iPhone και ό,τι δεν έχει ενσωματωμένο αναγνώστη).
+setTimeout(async () => {
+  try {
+    const d = await getDetector();
+    const c = document.createElement('canvas'); c.width = c.height = 16;
+    if (d) await d.detect(c);
+  } catch (e) {}
+}, 800);
 
 // Ήχος και δόνηση όταν διαβαστεί κωδικός
 let audio = null;
