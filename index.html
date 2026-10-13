@@ -240,6 +240,7 @@ body {
 
 <!-- Προαιρετικός πίνακας barcode προς προϊόν, για όσα το barcode δεν είναι ο κωδικός του site -->
 <script src="barcodes.js?v=2026-10-13"></script>
+<script src="barcodes-extra.js?v=2026-10-13b"></script>
 <!-- Λίστα καταστήματος: προϊόντα εκτός site με τιμή καταλόγου του προμηθευτή -->
 <script src="katastima.js?v=2026-10-13"></script>
 <script src="rrp.js?v=2026-10-13"></script>
@@ -349,7 +350,8 @@ async function lookup(raw) {
   try {
     if (isCode) {
       // Πρώτα η λίστα barcode: εκεί είναι όσα το barcode του κουτιού δεν είναι ο κωδικός του site
-      const id = (window.SB_BARCODES || {})[s];
+      // Barcode του site, και μετά όσα το site δεν έχει γραμμένα (τιμοκατάλογοι, Dashboard, ref Chicco)
+      const id = (window.SB_BARCODES || {})[s] || (window.SB_BARCODES_EXTRA || {})[s];
       if (id) {
         const p = await jsonp(`/${enc(id)}?_fields=${FIELDS}`);
         if (my !== seq) return;
