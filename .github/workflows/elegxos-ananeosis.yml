@@ -1,0 +1,68 @@
+# Elegxos oti to tablet anane'othike stin ora tou.
+# Trexei stous diakomistes tou GitHub, oxi ston laptop, gia na ftanei minyma
+# kai otan o laptop einai kleistos i to Claude den einai anoixto.
+# Kathe epityximeni ananeosi grafei to zontano.txt (1i grammi: Unix seconds).
+# An meta tin ora tis ananeosis to zontano.txt einai palio, stelnei ntfy.
+# To kanali ntfy einai sto secret NTFY_TOPIC, oxi edo (to repo einai dimosio).
+# Ores se UTC: 08:37 UTC = 10:37 Elladas to xeimona, 11:37 to kalokairi.
+#              17:07 UTC = 19:07 Elladas to xeimona, 20:07 to kalokairi.
+
+name: Elegxos ananeosis tablet
+
+on:
+  schedule:
+    - cron: '37 8 * * 1-6'
+    - cron: '7 17 * * 2,4,5'
+  workflow_dispatch:
+    inputs:
+      dokimi:
+        description: 'Steile dokimastiko minyma'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  elegxos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Elegxos zontano.txt
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          SCHED: ${{ github.event.schedule }}
+          DOKIMI: ${{ github.event.inputs.dokimi }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "Leipei to secret NTFY_TOPIC, den stelno tipota."
+            exit 0
+          fi
+
+          steile() {
+            titlos="=?UTF-8?B?$(printf 'Tablet τιμών' | base64 -w0)?="
+            curl -sS --fail --retry 3 \
+              -H "Title: $titlos" -H "Tags: warning" \
+              --data-binary "$1" "https://ntfy.sh/$NTFY_TOPIC" > /dev/null
+            echo "Stalthike minyma."
+          }
+
+          hb=$(head -n1 zontano.txt 2>/dev/null | tr -dc '0-9')
+          [ -z "$hb" ] && hb=0
+          echo "Teleftaia ananeosi: $(TZ=Europe/Athens date -d "@$hb" '+%F %H:%M')"
+
+          if [ "$DOKIMI" = "true" ]; then
+            steile "Δοκιμή από το GitHub: ο έλεγχος του tablet δουλεύει. Τελευταία ανανέωση $(TZ=Europe/Athens date -d "@$hb" '+%d/%m %H:%M')."
+            exit 0
+          fi
+
+          simera=$(TZ=Europe/Athens date +%F)
+          if [ "$SCHED" = "7 17 * * 2,4,5" ]; then apo="16:45"; else apo="08:00"; fi
+          orio=$(TZ=Europe/Athens date -d "$simera $apo" +%s)
+
+          if [ "$hb" -lt "$orio" ]; then
+            steile "Το tablet ΔΕΝ ανανεώθηκε στην ώρα του. Αν δεν σου ήρθε άλλο μήνυμα από τον λάπτοπ, μάλλον είναι κλειστός ή δεν είναι ανοιχτό το Claude."
+          else
+            echo "Ola kala, i ananeosi egine."
+          fi
