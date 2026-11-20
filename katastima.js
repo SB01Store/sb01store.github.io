@@ -1,7 +1,7 @@
 // Προϊόντα που ΔΕΝ είναι στο site: EAN -> [όνομα, κωδικός, τιμή, πηγή, ημερομηνία, αρχική τιμή ή 0,
 // k = τιμή καταλόγου του προμηθευτή, s = τιμή καταστήματος, p = η αρχική είναι προτεινόμενη λιανική].
 // Δεν ενημερώνεται μόνη της.
-// Φτιάχτηκε από systems/dashboard/build_katastima.py, 1686 προϊόντα.
+// Φτιάχτηκε από systems/dashboard/build_katastima.py, 1689 προϊόντα.
 window.SB_KATASTIMA = {
 "#1001000245":["BIBS κωδικός 1001000245", "1001000245", 6.45, "BIBS", "2026-11-20", 0, "s", ""],
 "#1001000260":["BIBS κωδικός 1001000260", "1001000260", 6.45, "BIBS", "2026-11-20", 0, "s", ""],
@@ -14,7 +14,7 @@ window.SB_KATASTIMA = {
 "#10050432108":["Lorelli ΤΡΙΚΥΚΛΟ ΠΟΔΗΛΑΤΑΚΙ SPEEDY ΜΕ ΠΕΡΙΣΤΡΕΦΟΜΕΝΟ ΚΑΘΙΣΜΑ 360° AIR GREY & BLACK LORELLI + ΔΩΡΟ ΚΟΥΔΟΥΝΑΚΙ", "10050432108", 181.99, "Lorelli", "2026-11-20", 0, "k", ""],
 "#10072202601":["Lorelli Car Seat Sol Black 125-150Cm", "10072202601", 15.99, "Lorelli", "2026-11-20", 17.99, "s", ""],
 "#10072202609":["Lorelli Car Seat Sol Beige 125-150Cm", "10072202609", 15.99, "Lorelli", "2026-11-20", 17.99, "s", ""],
-"#10090062146":["Lorelli BABY SWING PORTOFINO FROSTY GREEN STARS", "10090062146", 67.0, "Lorelli", "2026-11-20", 84.99, "s", ""],
+"#10090062146":["Lorelli BABY SWING PORTOFINO FROSTY GREEN STARS", "10090062146", 63.53, "Lorelli", "2026-11-20", 84.99, "s", ""],
 "#10130640130":["Lorelli κωδικός 10130640130", "10130640130", 6.99, "Lorelli", "2026-11-20", 7.99, "s", ""],
 "#10130640519":["Lorelli κωδικός 10130640519", "10130640519", 6.99, "Lorelli", "2026-11-20", 7.99, "s", ""],
 "#10130950001":["Lorelli κωδικός 10130950001", "10130950001", 23.99, "Lorelli", "2026-11-20", 25.99, "s", ""],
@@ -500,7 +500,7 @@ window.SB_KATASTIMA = {
 "3800151994343":["Lorelli STEP STOOL PIGGY COMIC GREY", "10130350133", 12.99, "Lorelli", "2026-11-20", 0, "s", ""],
 "3800151994350":["Lorelli Anatomic Toilet Seat Piggy Comic Grey", "10130400133", 9.99, "Lorelli", "2026-11-20", 0, "s", ""],
 "3800151995098":["Lorelli BABY SWING TANGO FROSTY GREEN STARS", "10090072146", 130.99, "Lorelli", "2026-11-20", 0, "s", ""],
-"3800151995296":["Lorelli BABY SWING PORTOFINO", "10090062148", 67.0, "Lorelli", "2026-11-20", 84.99, "s", ""],
+"3800151995296":["Lorelli BABY SWING PORTOFINO", "10090062148", 63.53, "Lorelli", "2026-11-20", 84.99, "s", ""],
 "3800151995661":["Lorelli Water Filled Teether Snail Green", "10210600001", 0.99, "Lorelli", "2026-11-20", 0, "s", ""],
 "3800151995678":["Lorelli Water Filled Teether Snail Yellow", "10210600002", 0.99, "Lorelli", "2026-11-20", 0, "s", ""],
 "3800151995876":["Lorelli BATH SPONGE YELLOW", "20040210004", 1.2, "Lorelli", "2026-11-20", 1.29, "s", ""],
@@ -518,7 +518,7 @@ window.SB_KATASTIMA = {
 "3800166100227":["Lorelli Glass Feeding Bottle 120 Ml Moonlight Blue", "10200610004", 1.99, "Lorelli", "2026-11-20", 0, "s", ""],
 "3800166100685":["Lorelli Feeding Chair Ego Plus 2In1 White Fluff Pu Leather", "10100502323", 37.98, "Lorelli", "2026-11-20", 37.99, "s", ""],
 "3800166101040":["Lorelli ΑΣΥΡΜΑΤΗ ΚΑΜΕΡΑ WIFI TRINITY LORELLI 1028021", "1028021", 35.99, "Lorelli", "2026-11-20", 39.99, "s", ""],
-"3800166101323":["Lorelli BABY SWING PORTOFINO PEACH BEIGE STARS", "10090062396", 67.0, "Lorelli", "2026-11-20", 84.99, "s", ""],
+"3800166101323":["Lorelli BABY SWING PORTOFINO PEACH BEIGE STARS", "10090062396", 63.53, "Lorelli", "2026-11-20", 84.99, "s", ""],
 "3800166101682":["Lorelli Children Tricycle Voyage Grey", "10050640001", 97.99, "Lorelli", "2026-11-20", 108.99, "s", ""],
 "3800166101804":["Lorelli Wally Black Floral Baby Ergonomic Backpack/Carrier", "10010160002", 38.99, "Lorelli", "2026-11-20", 0, "k", ""],
 "3800166103198":["Lorelli Bed Drawer  Colour White", "10170130024A", 51.99, "Lorelli", "2026-11-20", 57.99, "s", ""],
@@ -591,7 +591,7 @@ window.SB_KATASTIMA = {
 "3800166108988":["Lorelli ΜΑΞΙΛΑΡΙ ΘΗΛΑΣΜΟΥ ΚΑΙ ΕΓΚΥΜΟΣΥΝΗΣ LORELLI 190CM STARS BLUE GREY MIST", "20810063503", 24.14, "Lorelli", "2026-11-20", 26.99, "s", ""],
 "3800166109039":["Lorelli BABY NEST PALE BLUSH", "20030163502", 34.29, "Lorelli", "2026-11-20", 48.99, "s", ""],
 "3800166109152":["Lorelli Bed Dream 70/140 New  Colour White/Amber", "10150440044A", 279.99, "Lorelli", "2026-11-20", 0, "k", ""],
-"3800166109350":["Lorelli BABY PILLOW AIR COMFORT 60/45/9 CM GRAY STARS", "20040250010", 19.26, "Lorelli", "2026-11-20", 20.99, "s", ""],
+"3800166109350":["Lorelli BABY PILLOW AIR COMFORT 60/45/9 CM GRAY STARS", "20040250010", 20.71, "Lorelli", "2026-11-20", 20.99, "s", ""],
 "3800166109466":["Lorelli Set Eva 5 Pieces Little Bear Grey", "20801145903", 25.99, "Lorelli", "2026-11-20", 28.99, "s", ""],
 "3800166109480":["Lorelli SET FOR BABY STROLLER WITH PROTECTOR BEARS&PILLOWS", "20801176201", 20.99, "Lorelli", "2026-11-20", 0, "s", ""],
 "3800166110448":["Lorelli Bottle Drying Rack Moonlight Blue", "10240320004", 4.9, "Lorelli", "2026-11-20", 4.99, "s", ""],
@@ -1245,7 +1245,6 @@ window.SB_KATASTIMA = {
 "3830084381934":["FreeOn Ηλιοπροστασία Αυτοκινήτου 2τεμ.  Lion 48 x 30,5 cm Lion", "", 9.99, "FreeOn", "2026-11-20", 0, "k", ""],
 "3830084381965":["FreeOn Πόρτα ασφαλείας πτυσσόμενη Sigma 50-140 cm black", "", 54.99, "FreeOn", "2026-11-20", 0, "k", ""],
 "3830084382184":["FreeOn παιδικό backpack Little explorer grey", "", 26.99, "FreeOn", "2026-11-20", 0, "k", ""],
-"3830084382672":["FreeON Kai Καρεκλάκι Φαγητού Pink 82672", "3830084382672", 86.99, "manage-orders", "2026-11-20", 0, "s", ""],
 "3830084382757":["FreeOn Free2Play Πανάκι παρηγοριάς με μασητικό Ελεφαντάκι", "", 11.99, "FreeOn", "2026-11-20", 0, "k", ""],
 "3830084382863":["FreeOn Μπόλ σιλικόνης με αντιολισθητική βεντούζα green", "", 9.99, "FreeOn", "2026-11-20", 0, "k", ""],
 "3830084382870":["FreeOn Μπόλ σιλικόνης με αντιολισθητική βεντούζα grey", "", 9.99, "FreeOn", "2026-11-20", 0, "k", ""],
@@ -1584,6 +1583,10 @@ window.SB_KATASTIMA = {
 "5902308593299":["FreeOn Seven Σκίαστρα Αυτοκινήτου Winnie the Pooh 44x35 2", "5902308593299", 5.99, "manage-orders", "2026-11-20", 0, "s", ""],
 "5902533927388":["Kinderkraft ποδήλατο ισορροπίας 2WAY NEXT OFF ROAD", "5902533927388", 46.99, "manage-orders", "2026-11-20", 0, "s", ""],
 "5902533927463":["Kinderkraft ποδήλατο ισορροπίας 2WAY NEXT OFF ROAD", "5902533927463", 46.99, "manage-orders", "2026-11-20", 0, "s", ""],
+"5902533931026":["Kinderkraft NiteEye Travel Ενδοεπικοινωνία με Κάμε", "5902533931026", 119.9, "manage-orders", "2026-11-20", 0, "s", ""],
+"5902533931729":["Kinderkraft Mimi Ρηλάξ Μωρού με Λίκνισμα Beige Woo", "5902533931729", 74.9, "manage-orders", "2026-11-20", 0, "s", ""],
+"5902533932092":["Kinderkraft NiteEye Travel Επιπλέον Κάμερα KENITRC", "5902533932092", 49.9, "manage-orders", "2026-11-20", 0, "s", ""],
+"5902533932115":["Kinderkraft NiteEye Glow Επιπλέον Κάμερα KENIGLCAW", "5902533932115", 54.9, "manage-orders", "2026-11-20", 0, "s", ""],
 "5907442107227":["Cangaroo Mochtoys 10722 Picnic table", "5907442107227", 66.32, "Cangaroo", "2026-11-20", 0, "s", ""],
 "5907644004560":["Akuku Παιχνίδι Μπάνιου A0456", "5907644004560", 11.99, "manage-orders", "2026-11-20", 0, "s", ""],
 "6925783801368":["Cangaroo Bali Bazoo 80136 Sensor Pyramid", "6925783801368", 6.66, "Cangaroo", "2026-11-20", 0, "s", ""],
