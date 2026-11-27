@@ -1,7 +1,7 @@
 // Προϊόντα που ΔΕΝ είναι στο site: EAN -> [όνομα, κωδικός, τιμή, πηγή, ημερομηνία, αρχική τιμή ή 0,
 // k = τιμή καταλόγου του προμηθευτή, s = τιμή καταστήματος, p = η αρχική είναι προτεινόμενη λιανική].
 // Δεν ενημερώνεται μόνη της.
-// Φτιάχτηκε από systems/dashboard/build_katastima.py, 1661 προϊόντα.
+// Φτιάχτηκε από systems/dashboard/build_katastima.py, 1660 προϊόντα.
 window.SB_KATASTIMA = {
 "#1001000245":["BIBS κωδικός 1001000245", "1001000245", 6.45, "BIBS", "2026-11-27", 0, "s", ""],
 "#1001000260":["BIBS κωδικός 1001000260", "1001000260", 6.45, "BIBS", "2026-11-27", 0, "s", ""],
@@ -14,7 +14,7 @@ window.SB_KATASTIMA = {
 "#10050432108":["Lorelli ΤΡΙΚΥΚΛΟ ΠΟΔΗΛΑΤΑΚΙ SPEEDY ΜΕ ΠΕΡΙΣΤΡΕΦΟΜΕΝΟ ΚΑΘΙΣΜΑ 360° AIR GREY & BLACK LORELLI + ΔΩΡΟ ΚΟΥΔΟΥΝΑΚΙ", "10050432108", 181.99, "Lorelli", "2026-11-27", 0, "k", ""],
 "#10072202601":["Lorelli Car Seat Sol Black 125-150Cm", "10072202601", 15.99, "Lorelli", "2026-11-27", 17.99, "s", ""],
 "#10072202609":["Lorelli Car Seat Sol Beige 125-150Cm", "10072202609", 15.99, "Lorelli", "2026-11-27", 17.99, "s", ""],
-"#10090062146":["Lorelli BABY SWING PORTOFINO FROSTY GREEN STARS", "10090062146", 69.22, "Lorelli", "2026-11-27", 84.99, "s", ""],
+"#10090062146":["Lorelli BABY SWING PORTOFINO FROSTY GREEN STARS", "10090062146", 72.42, "Lorelli", "2026-11-27", 84.99, "s", ""],
 "#10130640130":["Lorelli κωδικός 10130640130", "10130640130", 6.99, "Lorelli", "2026-11-27", 7.99, "s", ""],
 "#10130640519":["Lorelli κωδικός 10130640519", "10130640519", 6.99, "Lorelli", "2026-11-27", 7.99, "s", ""],
 "#10130950001":["Lorelli κωδικός 10130950001", "10130950001", 23.99, "Lorelli", "2026-11-27", 25.99, "s", ""],
@@ -501,7 +501,7 @@ window.SB_KATASTIMA = {
 "3800151994343":["Lorelli STEP STOOL PIGGY COMIC GREY", "10130350133", 12.99, "Lorelli", "2026-11-27", 0, "s", ""],
 "3800151994350":["Lorelli Anatomic Toilet Seat Piggy Comic Grey", "10130400133", 9.99, "Lorelli", "2026-11-27", 0, "s", ""],
 "3800151995098":["Lorelli BABY SWING TANGO FROSTY GREEN STARS", "10090072146", 130.99, "Lorelli", "2026-11-27", 0, "s", ""],
-"3800151995296":["Lorelli BABY SWING PORTOFINO", "10090062148", 69.22, "Lorelli", "2026-11-27", 84.99, "s", ""],
+"3800151995296":["Lorelli BABY SWING PORTOFINO", "10090062148", 72.42, "Lorelli", "2026-11-27", 84.99, "s", ""],
 "3800151995661":["Lorelli Water Filled Teether Snail Green", "10210600001", 0.99, "Lorelli", "2026-11-27", 0, "s", ""],
 "3800151995678":["Lorelli Water Filled Teether Snail Yellow", "10210600002", 0.99, "Lorelli", "2026-11-27", 0, "s", ""],
 "3800151995876":["Lorelli BATH SPONGE YELLOW", "20040210004", 1.2, "Lorelli", "2026-11-27", 1.29, "s", ""],
@@ -519,7 +519,7 @@ window.SB_KATASTIMA = {
 "3800166100227":["Lorelli Glass Feeding Bottle 120 Ml Moonlight Blue", "10200610004", 1.99, "Lorelli", "2026-11-27", 0, "s", ""],
 "3800166100685":["Lorelli Feeding Chair Ego Plus 2In1 White Fluff Pu Leather", "10100502323", 37.98, "Lorelli", "2026-11-27", 37.99, "s", ""],
 "3800166101040":["Lorelli ΑΣΥΡΜΑΤΗ ΚΑΜΕΡΑ WIFI TRINITY LORELLI 1028021", "1028021", 35.99, "Lorelli", "2026-11-27", 39.99, "s", ""],
-"3800166101323":["Lorelli BABY SWING PORTOFINO PEACH BEIGE STARS", "10090062396", 69.22, "Lorelli", "2026-11-27", 84.99, "s", ""],
+"3800166101323":["Lorelli BABY SWING PORTOFINO PEACH BEIGE STARS", "10090062396", 72.42, "Lorelli", "2026-11-27", 84.99, "s", ""],
 "3800166101682":["Lorelli Children Tricycle Voyage Grey", "10050640001", 97.99, "Lorelli", "2026-11-27", 108.99, "s", ""],
 "3800166101804":["Lorelli Wally Black Floral Baby Ergonomic Backpack/Carrier", "10010160002", 38.99, "Lorelli", "2026-11-27", 0, "k", ""],
 "3800166103198":["Lorelli Bed Drawer  Colour White", "10170130024A", 51.99, "Lorelli", "2026-11-27", 57.99, "s", ""],
@@ -1421,7 +1421,6 @@ window.SB_KATASTIMA = {
 "5207317079131":["ABO Kids Velvet Bedspread - Pink", "2585-400", 31.99, "ABO", "2026-11-27", 0, "k", ""],
 "5212012624500":["Tender ΥΠΝΟΣΑΚΟΣ CLASSIC - LLAMA 2.5 Tog 2702-1", "5212012624500", 42.99, "manage-orders", "2026-11-27", 0, "s", ""],
 "5212012624524":["Tender ΥΠΝΟΣΑΚΟΣ CLASSIC - LLAMA 2.5 Tog 2702-1", "5212012624524", 42.99, "manage-orders", "2026-11-27", 0, "s", ""],
-"5212012624890":["Tender Classic Υπνόσακος με Πόδια και Αποσπώμενα Μ", "5212012624890", 38.0, "manage-orders", "2026-11-27", 46.99, "s", ""],
 "5212012625422":["Tender Marble Υπνόσακος χωρίς Πόδια με Αποσπώμενα", "5212012625422", 38.0, "manage-orders", "2026-11-27", 46.99, "s", ""],
 "5212012625439":["Tender Marble Υπνόσακος χωρίς Πόδια με Αποσπώμενα", "5212012625439", 38.0, "manage-orders", "2026-11-27", 46.99, "s", ""],
 "5212012625576":["Tender Flex Υπνόσακος με Πόδια και Αποσπώμενα Μανί", "5212012625576", 42.0, "manage-orders", "2026-11-27", 51.99, "s", ""],
